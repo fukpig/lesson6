@@ -37,7 +37,7 @@ class Netflix < BaseTheater
 
   def how_much?(title)
     movie = filter({:title => title}).first
-    raise MovieNotFound.new(title) if movie.nil?
+    raise MovieNotFound.new(title: title) if movie.nil?
     movie.cost
   end
 
@@ -56,12 +56,8 @@ class Netflix < BaseTheater
 
   def get_filtered_film(filter_hash)
     filtered_movies = filter(filter_hash)
-    if filtered_movies.count > 1
-      return filtered_movies.sample
-    elsif filtered_movies == 1
-      filtered_movies.first
-    else
-      raise MovieToShowNotFound.new
-    end
+    movie = filtered_movies.sample
+    raise MovieNotFound.new(filter_hash) if movie.nil?
+    return movie
   end
 end

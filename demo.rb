@@ -14,4 +14,4 @@ theater = Theater.new("movies.txt")
 puts theater.when?('Psycho')
 
 puts theater.show("10:30")
-puts theater.show()
+puts theater.show("13:00")

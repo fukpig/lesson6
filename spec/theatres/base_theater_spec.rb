@@ -1,53 +1,46 @@
 require 'spec_helper'
+require 'rspec/its'
+
 require './theatres/base_theatre.rb'
 
 describe BaseTheater do
-  before :each do
-    @theater = BaseTheater.new("spec_movies.txt")
-  end
+  let(:file) { "spec_movies.txt" }
+  let(:theater) { BaseTheater.new(file) }
 
-  describe ".all" do
-    it "return all 6 movies" do
-      expect(@theater.all.count).to eq(6)
+  describe '#all' do
+    subject { theater }
+    it 'return array with all movies' do
+      expect(theater.all.count).to eq 6
     end
   end
 
-  describe ".show" do
-    it "return film title" do
-      @movie = @theater.all.first
-      current_time = Time.now.strftime("%H:%M")
-      movie_end_time = (Time.now + @movie.duration*60).strftime("%H:%M")
-      expect(@theater.show(@movie)).to eq("Now showing: #{@movie.title} #{current_time} - #{movie_end_time}")
+  describe '#filter' do
+    subject { theater.filter(filter_hash) }
+    it 'works with patterns' do
+      expect(theater.filter({:title => "Million Dollar Baby"}).first.title).to eq "Million Dollar Baby"
+      expect(theater.filter({:release_year => 2019..2020}).first).to be_nil
     end
   end
 
-  describe ".create_movie" do
-    it "check first movies class" do
-      @movie = @theater.all[0]
-      expect(@movie.class).to eq(ModernMovie)
-    end
-
-    it "check second movies class" do
-      @movie = @theater.all[1]
-      expect(@movie.class).to eq(AncientMovie)
-    end
-
-    it "check third movies class" do
-      @movie = @theater.all[2]
-      expect(@movie.class).to eq(ClassicMovie)
-    end
-
-    it "check fourth movies class" do
-      @movie = @theater.all[3]
-      expect(@movie.class).to eq(NewMovie)
+  describe '#show' do
+    subject { theater.show(movie) }
+    let(:movie) { theater.movies.first }
+    let(:current_time) { Time.now.strftime("%H:%M") }
+    let(:movie_end_time) { (Time.now + movie.duration*60).strftime("%H:%M") }
+    it 'show movie' do
+      expect(theater.show(movie)).to eq "Now showing: The Shining #{current_time} - #{movie_end_time}"
     end
   end
 
-  describe ".filter" do
-    it "return film the shing only" do
-      filter_hash = {:title => 'The Shining'}
-      expect(@theater.filter(filter_hash).first.title).to eq("The Shining")
+  describe 'factory' do
+    subject { theater }
+
+    #be_a not working
+    it 'check valid classes' do
+      expect(theater.movies[0].class).to eq ModernMovie
+      expect(theater.movies[1].class).to eq AncientMovie
+      expect(theater.movies[2].class).to eq ClassicMovie
+      expect(theater.movies[3].class).to eq NewMovie
     end
   end
-
 end

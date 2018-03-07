@@ -1,51 +1,63 @@
 require 'spec_helper'
+require 'rspec/its'
+
 require './theatres/netflix.rb'
 
 describe Netflix do
-  before :each do
-    @netflix = Netflix.new("spec_movies.txt")
-  end
+  let(:file) { "spec_movies.txt" }
+  let(:netflix) { Netflix.new(file) }
 
-  describe ".withdraw" do
-    it "widthdraw 5 dollars" do
-      @netflix.pay(5)
-      @netflix.withdraw(5)
-      expect(@netflix.wallet).to eq(0)
+  describe '#withdraw' do
+    subject(:withdraw) { netflix.withdraw(5) }
+    context 'when enough money' do
+      before { netflix.pay(5) }
+      it { expect { withdraw } .to change(netflix, :wallet).by(-5) }
     end
-
-    it "widthdraw raise error" do
-      expect{@netflix.withdraw(5)}.to raise_error(Netflix::WithdrawError)
+    context 'when not enough money' do
+      it { expect { withdraw } .to raise_error(Netflix::WithdrawError) }
     end
   end
 
-  describe ".check_money" do
-    it "check 5 dollars raise error" do
-      expect{@netflix.check_money(5)}.to raise_error(Netflix::WithdrawError)
+  describe '#check_money' do
+    subject(:check_money) { netflix.check_money(5) }
+    context 'when not enough money' do
+      it { expect { check_money } .to raise_error(Netflix::WithdrawError) }
     end
   end
 
-  describe ".pay" do
-    it "add 5 money to wallet" do
-      @netflix.pay(5)
-      expect(@netflix.wallet).to eq(5)
+  describe '#pay' do
+    subject(:pay) { netflix.pay(5) }
+    context 'get 5 dollars after payment' do
+      it { expect { pay } .to change(netflix, :wallet).by(5) }
     end
   end
 
-  describe ".how_much?" do
-    it "check movie cost" do
-      expect(@netflix.how_much?("The Shining")).to eq(3)
+  describe '#how_much?' do
+    it 'return 3 dollars' do
+      expect(netflix.how_much?("The Shining")).to eq 3
     end
   end
 
-  describe ".show" do
-    it "show" do
-      @netflix.pay(5)
-      expect(@netflix.show()).to include("Now showing:")
+  describe '#show' do
+    subject(:show) { netflix.show(params) }
+    context 'when enough money' do
+      let(:params) { }
+      before { netflix.pay(5) }
+      it { is_expected.to include "Now showing" }
     end
-
-    it "error" do
-      @netflix.pay(5)
-      expect{@netflix.show(genre: 'Spec genre')}.to raise_error(BaseTheater::MovieToShowNotFound)
+    context 'when enough money and filter' do
+      let(:params) { {genre: 'Horror'} }
+      before { netflix.pay(5) }
+      it { is_expected.to include "Now showing" }
+    end
+    context 'when enough money and movie not found' do
+      let(:params) { {genre: 'Tragedy'} }
+      before { netflix.pay(5) }
+      it { expect { show }.to raise_error(BaseTheater::MovieNotFound) }
+    end
+    context 'when not enough money' do
+      let(:params) { {genre: 'Horror'} }
+      it { expect { show }.to raise_error(Netflix::WithdrawError) }
     end
   end
 

@@ -16,16 +16,10 @@ class BaseTheater
   end
 
   class MovieNotFound < StandardError
-    attr_reader :title
-    def initialize(title)
-      @title = title
-      super("Movie #{title} not found")
-    end
-  end
-
-  class MovieToShowNotFound < StandardError
-    def initialize()
-      super("Movie to show not found")
+    attr_reader :hash
+    def initialize(hash)
+      @hash = hash
+      super("Movie with params #{hash.to_s} not found")
     end
   end
 

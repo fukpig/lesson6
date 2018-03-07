@@ -1,17 +1,9 @@
 # define class  AncientMovie
 require 'date'
-require './movies/base_movie.rb'
+require_relative 'base_movie.rb'
 class NewMovie < BaseMovie
   COST = 5
   PERIOD = :new
-
-  def cost()
-    COST
-  end
-
-  def period()
-    PERIOD
-  end
 
   def release_years_ago()
     Date.today.year-release_year
