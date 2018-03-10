@@ -22,7 +22,7 @@ class Netflix < BaseTheater
   end
 
   def check_money(amount)
-    raise WithdrawError.new if (@wallet - amount) < 0
+    raise WithdrawError if (@wallet - amount) < 0
   end
 
   def withdraw(amount)
@@ -31,7 +31,7 @@ class Netflix < BaseTheater
   end
 
   def pay(amount)
-    raise PaymentError.new unless amount > 0
+    raise PaymentError unless amount > 0
     @wallet += amount
   end
 
@@ -42,12 +42,7 @@ class Netflix < BaseTheater
   end
 
   def show(filter_hash = nil)
-    if filter_hash.nil?
-      movie = movies.sample
-    else
-      movie = get_filtered_film(filter_hash)
-    end
-
+    movie = filter_hash.nil? ? movies.sample : get_filtered_film(filter_hash)
     withdraw(movie.cost)
     super(movie)
   end
@@ -58,6 +53,6 @@ class Netflix < BaseTheater
     filtered_movies = filter(filter_hash)
     movie = filtered_movies.sample
     raise MovieNotFound.new(filter_hash) if movie.nil?
-    return movie
+    movie
   end
 end

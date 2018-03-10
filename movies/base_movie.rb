@@ -1,10 +1,14 @@
 # define class  Movie
 class BaseMovie
-  attr_reader :href, :title, :release_year, :country, :release_date, :genre, :full_duration_definition, :duration, :duration_definition, :rating, :director, :actors, :movie_collection
+  class ConstantError < StandardError
+    attr_reader :constant_name
+    def initialize(constant_name)
+      @constant_name = constant_name
+      super("CONSTANT #{constant_name} not set")
+    end
+  end
 
-  #defalt period and cost
-  COST = 0
-  PERIOD = :not_set
+  attr_reader :href, :title, :release_year, :country, :release_date, :genre, :full_duration_definition, :duration, :duration_definition, :rating, :director, :actors, :movie_collection
 
   def initialize(args, movie_collection)
     args.map { |k,v| instance_variable_set("@#{k}", v) unless v.nil?}
@@ -13,10 +17,12 @@ class BaseMovie
   end
 
   def cost()
+    raise ConstantError.new("cost") unless defined? self.class::COST
     self.class::COST
   end
 
   def period()
+    raise ConstantError.new("period") unless defined? self.class::PERIOD
     self.class::PERIOD
   end
 
@@ -28,11 +34,7 @@ class BaseMovie
     "#<Movie \"#{@title}\" (#{@release_year})>"
   end
 
-  def matches_period?(filter)
-    filter.any? { |k,v| (send(k).class == Array) ? send(k).any?{|x| v.include?(x) } : matches?(k,v) }
-  end
-
-  def matches?(key, value)
+  def matches?(key,value)
     Array(send(key)).any? { |v| value === v}
   end
 

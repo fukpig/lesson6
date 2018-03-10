@@ -9,18 +9,19 @@ describe ClassicMovie do
   let(:theater) { BaseTheater.new("spec_movies.txt") }
   let(:movie) { ClassicMovie.new(arguments, theater) }
 
-  describe '#period' do
+  describe 'valid classic movie' do
     subject { movie }
-    its(:period) { is_expected.to eq :classic }
-  end
 
-  describe '#cost' do
-    subject { movie }
-    its(:cost) { is_expected.to eq 1.5 }
-  end
+    it 'return classic on get period' do
+      expect(movie.period).to eq :classic
+    end
 
-  describe '#poster_title' do
-    subject { movie }
-    its(:poster_title) { is_expected.to eq "Vertigo — classic movie, director Alfred Hitchcock (still in the top 1 of his films)" }
+    it 'return 1.5 on get cost' do
+      expect(movie.cost).to eq 1.5
+    end
+
+    it 'valid poster title' do
+      expect(movie.poster_title).to eq "Vertigo — classic movie, director Alfred Hitchcock (still in the top 1 of his films)"
+    end
   end
 end

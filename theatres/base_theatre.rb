@@ -9,9 +9,9 @@ require './movies/new_movie.rb'
 class BaseTheater
   class FileNotFound < ArgumentError
     attr_reader :filename
-      def initialize(filename)
-        @filename = filename
-        super("File #{filename} not found")
+    def initialize(filename)
+      @filename = filename
+      super("File #{filename} not found")
     end
   end
 
@@ -44,7 +44,7 @@ class BaseTheater
   def filter(filters)
     filters.reduce(@movies) { |filtered, (key, value)| filtered.select { |m| m.matches?(key, value) } }
   end
-
+  
   def show(movie)
     current_time = Time.now.strftime("%H:%M")
     movie_end_time = (Time.now + movie.duration*60).strftime("%H:%M")

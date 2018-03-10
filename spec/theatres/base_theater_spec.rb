@@ -19,6 +19,11 @@ describe BaseTheater do
     it 'works with patterns' do
       expect(theater.filter({:title => "Million Dollar Baby"}).first.title).to eq "Million Dollar Baby"
       expect(theater.filter({:release_year => 2019..2020}).first).to be_nil
+      expect(theater.filter(director: /Stanley Kubrick/)).to all have_attributes(director: 'Stanley Kubrick')
+      expect(theater.filter(period: :classic)).to all have_attributes(period: :classic)
+      expect(theater.filter(country: "USA")).to all have_attributes(country: "USA")
+      expect(theater.filter(actors: "Clint Eastwood")).to all have_attributes(actors: array_including('Clint Eastwood'))
+      expect(theater.filter(genre: 'Drama')).to all have_attributes(genre: array_including('Drama'))
     end
   end
 
@@ -35,12 +40,11 @@ describe BaseTheater do
   describe 'factory' do
     subject { theater }
 
-    #be_a not working
     it 'check valid classes' do
-      expect(theater.movies[0].class).to eq ModernMovie
-      expect(theater.movies[1].class).to eq AncientMovie
-      expect(theater.movies[2].class).to eq ClassicMovie
-      expect(theater.movies[3].class).to eq NewMovie
+      expect(theater.movies[0]).to be_a ModernMovie
+      expect(theater.movies[1]).to be_a AncientMovie
+      expect(theater.movies[2]).to be_a ClassicMovie
+      expect(theater.movies[3]).to be_a NewMovie
     end
   end
 end

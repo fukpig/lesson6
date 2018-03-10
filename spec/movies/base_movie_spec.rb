@@ -7,45 +7,27 @@ describe BaseMovie do
   let(:arguments) { {:href => "url", :title => "The thing", :release_year => "1983", :country => "USA", :release_date => "1983-01-01", :genre => "Horror", :full_duration_definition => "103 min", :rating => 8, :director => 'Carpenter', :actors => "Kurt Russell"} }
   let(:movie) { BaseMovie.new(arguments, nil) }
 
-  describe '#normalize_attributes' do
+  describe 'valid new object' do
     subject { movie }
 
-    context 'genres' do
-      its(:genre) { is_expected.to eq ["Horror"] }
+    it {
+      is_expected.to have_attributes(
+        genre: ["Horror"],
+        release_year: 1983,
+        duration: 103,
+        duration_definition: "min",
+        rating: 8.0,
+        actors: ["Kurt Russell"]
+      )
+    }
+
+    it 'return error on get cost' do
+      expect{movie.cost}.to raise_error(BaseMovie::ConstantError)
     end
 
-    context 'release_year' do
-      its(:release_year) { is_expected.to be_a(Integer) }
-      its(:release_year) { is_expected.to eq 1983 }
+    it 'return error on get period' do
+      expect{movie.period}.to raise_error(BaseMovie::ConstantError)
     end
-
-    context 'duration' do
-      its(:duration) { is_expected.to eq 103 }
-    end
-
-    context 'duration_definition' do
-      its(:duration_definition) { is_expected.to eq "min" }
-    end
-
-    context 'rating' do
-      its(:rating) { is_expected.to be_a(Float) }
-      its(:rating) { is_expected.to eq 8.0 }
-    end
-
-    context 'actors' do
-      its(:actors) { is_expected.to eq ["Kurt Russell"] }
-    end
-
-  end
-
-  describe '#period' do
-    subject { movie }
-    its(:period) { is_expected.to eq :not_set }
-  end
-
-  describe '#cost' do
-    subject { movie }
-    its(:cost) { is_expected.to eq 0 }
   end
 
   describe '#matches?' do
@@ -86,32 +68,5 @@ describe BaseMovie do
     end
   end
 
-  describe '#matches_period?' do
-    subject { movie.matches_period?(filter_hash) }
 
-    context 'period' do
-      let(:filter_hash) { :filter_hash }
-      context 'when matches' do
-        let(:filter_hash) { {:period => :not_set} }
-        it { is_expected.to be_truthy }
-      end
-      context 'when not matches' do
-        let(:filter_hash) { {:period => :classic} }
-        it { is_expected.to be_falsy }
-      end
-    end
-
-    context 'genres' do
-      let(:filter_hash) { :filter_hash }
-      context 'when matches' do
-        let(:filter_hash) { { :genre => ["Horror", "Drama"] } }
-        it { is_expected.to be_truthy }
-      end
-      context 'when not  matches' do
-        let(:filter_hash) { { :genre => ["Tragedy"] } }
-        it { is_expected.to be_falsy }
-      end
-    end
-
-  end
 end
