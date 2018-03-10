@@ -45,12 +45,9 @@ describe Netflix do
   describe '#show' do
     context 'check show' do
       before { netflix.pay(5) }
-      let (:movie) { double("ClassicMovie") }
+      let (:movie) { double("ClassicMovie", :cost => 1.5, :duration => 100, :title => "The thing") }
       let(:current_time) { Time.now.strftime("%H:%M") }
       it 'check without filter' do
-        movie.stub(:cost) { 1.5 }
-        movie.stub(:duration) { 100 }
-        movie.stub(:title) { "The thing" }
         netflix.stub(:movies) { [movie] }
         movie_end_time = (Time.now + movie.duration*60).strftime("%H:%M")
 
@@ -59,10 +56,6 @@ describe Netflix do
       end
 
       it 'check with filter' do
-        movie.stub(:cost) { 1.5 }
-        movie.stub(:duration) { 100 }
-        movie.stub(:title) { "The thing" }
-
         netflix.stub(:filter) { [movie] }
         movie_end_time = (Time.now + movie.duration*60).strftime("%H:%M")
 
