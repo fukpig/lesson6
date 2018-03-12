@@ -1,5 +1,7 @@
 require 'spec_helper'
 require 'rspec/its'
+require 'timecop'
+
 
 require './theatres/base_theatre.rb'
 
@@ -28,12 +30,11 @@ describe BaseTheater do
   end
 
   describe '#show' do
+    before { Timecop.freeze(Time.local(2018, 3, 12, 13, 0, 0)) }
     subject { theater.show(movie) }
     let(:movie) { theater.movies.first }
-    let(:current_time) { Time.now.strftime("%H:%M") }
-    let(:movie_end_time) { (Time.now + movie.duration*60).strftime("%H:%M") }
     it 'show movie' do
-      expect(theater.show(movie)).to eq "Now showing: The Shining #{current_time} - #{movie_end_time}"
+      expect{theater.show(movie)}.to output("Now showing: The Shining 13:00 - 15:26\n").to_stdout
     end
   end
 

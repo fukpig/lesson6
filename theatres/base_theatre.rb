@@ -44,11 +44,11 @@ class BaseTheater
   def filter(filters)
     filters.reduce(@movies) { |filtered, (key, value)| filtered.select { |m| m.matches?(key, value) } }
   end
-  
+
   def show(movie)
     current_time = Time.now.strftime("%H:%M")
     movie_end_time = (Time.now + movie.duration*60).strftime("%H:%M")
-    "Now showing: #{movie.title} #{current_time} - #{movie_end_time}"
+    puts "Now showing: #{movie.title} #{current_time} - #{movie_end_time}"
   end
 
   private

@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'rspec/its'
+require 'timecop'
 
 require './theatres/theater.rb'
 
@@ -20,54 +21,77 @@ describe Theater do
   end
 
   describe '#show' do
-    let(:current_time) { Time.now.strftime("%H:%M") }
+    before { Timecop.freeze(Time.local(2018, 3, 12, 13, 0, 0)) }
+
+    context "check filter works properly" do
+      let (:movie) { double("ClassicMovie", :duration => 100, :title => "The thing") }
+        it 'return period ancient filter' do
+          allow(theater).to receive(:filter).and_return([movie])
+          theater.show("10:00")
+          expect(theater).to have_received(:filter).with({:period=>:ancient})
+        end
+    end
 
     context "check morning classic movie" do
       let (:movie) { double("ClassicMovie", :duration => 100, :title => "The thing") }
-      it 'show film from morning period' do
-        theater.stub(:filter) { [movie] }
-        movie_end_time = (Time.now + movie.duration*60).strftime("%H:%M")
-        expect(theater.show("10:00")).to eq "Now showing: The thing #{current_time} - #{movie_end_time}"
+      it "show film from morning period" do
+        allow(theater).to receive(:filter).and_return([movie])
+        expect{theater.show("10:00")}.to output("Now showing: The thing 13:00 - 14:40\n").to_stdout
       end
     end
 
     context "check day adventure or comedy movie" do
+      context "check filter works properly" do
+        let (:movie) { double("ModernMovie", :duration => 110, :title => "Indiana Jones", :genre => ["Adventure"]) }
+          it 'return adventure or comedy regexp' do
+            allow(theater).to receive(:filter).and_return([movie])
+            theater.show("13:00")
+            expect(theater).to have_received(:filter).with({:genre=>/Comedy|Adventure/})
+          end
+      end
+
       context "adventure movie" do
         let (:movie) { double("ModernMovie", :duration => 110, :title => "Indiana Jones", :genre => ["Adventure"]) }
           it 'when adventure film' do
-            theater.stub(:filter) { [movie] }
-            movie_end_time = (Time.now + movie.duration*60).strftime("%H:%M")
-            expect(theater.show("13:00")).to eq "Now showing: Indiana Jones #{current_time} - #{movie_end_time}"
+            allow(theater).to receive(:filter).and_return([movie])
+            expect{theater.show("13:00")}.to output("Now showing: Indiana Jones 13:00 - 14:50\n").to_stdout
           end
       end
 
       context "comedy movie" do
         let (:movie) { double("ModernMovie", :duration => 110, :title => "Dumb and dumber", :genre => ["Comedy"]) }
           it 'when adventure film' do
-            theater.stub(:filter) { [movie] }
-            movie_end_time = (Time.now + movie.duration*60).strftime("%H:%M")
-            expect(theater.show("13:00")).to eq "Now showing: Dumb and dumber #{current_time} - #{movie_end_time}"
+            allow(theater).to receive(:filter).and_return([movie])
+            expect{theater.show("13:00")}.to output("Now showing: Dumb and dumber 13:00 - 14:50\n").to_stdout
           end
       end
     end
 
 
     context "check evening horror or drama movie" do
+      context "check filter works properly" do
+        let (:movie) { double("ModernMovie", :duration => 110, :title => "Alien", :genre => ["Horror"]) }
+          it 'return horror or drama regexp' do
+            allow(theater).to receive(:filter).and_return([movie])
+            theater.show("21:00")
+            expect(theater).to have_received(:filter).with({:genre=>/Horror|Drama/})
+          end
+      end
+
+
       context "adventure movie" do
         let (:movie) { double("ModernMovie", :duration => 110, :title => "Alien", :genre => ["Horror"]) }
           it 'when horror film' do
-            theater.stub(:filter) { [movie] }
-            movie_end_time = (Time.now + movie.duration*60).strftime("%H:%M")
-            expect(theater.show("21:00")).to eq "Now showing: Alien #{current_time} - #{movie_end_time}"
+            allow(theater).to receive(:filter).and_return([movie])
+            expect{theater.show("21:00")}.to output("Now showing: Alien 13:00 - 14:50\n").to_stdout
           end
       end
 
       context "drama movie" do
         let (:movie) { double("ModernMovie", :duration => 110, :title => "Bridgit jones", :genre => ["Drama"]) }
           it 'when drama film' do
-            theater.stub(:filter) { [movie] }
-            movie_end_time = (Time.now + movie.duration*60).strftime("%H:%M")
-            expect(theater.show("21:00")).to eq "Now showing: Bridgit jones #{current_time} - #{movie_end_time}"
+            allow(theater).to receive(:filter).and_return([movie])
+            expect{theater.show("21:00")}.to output("Now showing: Bridgit jones 13:00 - 14:50\n").to_stdout 
           end
       end
     end

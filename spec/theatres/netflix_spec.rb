@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'rspec/its'
+require 'timecop'
 
 require './theatres/netflix.rb'
 
@@ -45,26 +46,44 @@ describe Netflix do
   describe '#show' do
     context 'check show' do
       before { netflix.pay(5) }
+      before { Timecop.freeze(Time.local(2018, 3, 12, 13, 0, 0)) }
       let (:movie) { double("ClassicMovie", :cost => 1.5, :duration => 100, :title => "The thing") }
-      let(:current_time) { Time.now.strftime("%H:%M") }
-      it 'check without filter' do
-        netflix.stub(:movies) { [movie] }
-        movie_end_time = (Time.now + movie.duration*60).strftime("%H:%M")
 
-        expect(netflix.show()).to eq "Now showing: The thing #{current_time} - #{movie_end_time}"
-        expect(netflix.wallet).to eq 3.5
+
+      context 'check without filter' do
+        it 'check show film' do
+          allow(netflix).to receive(:movies).and_return([movie])
+          expect{netflix.show()}.to output("Now showing: The thing 13:00 - 14:40\n").to_stdout
+          #expect(netflix.wallet).to eq 3.5
+        end
+
+        it 'expect to withdraw payment for movie' do
+          allow(netflix).to receive(:movies).and_return([movie])
+          expect {netflix.show()} .to change(netflix, :wallet).from(5).to(3.5)
+        end
       end
 
-      it 'check with filter' do
-        netflix.stub(:filter) { [movie] }
-        movie_end_time = (Time.now + movie.duration*60).strftime("%H:%M")
+      context 'check with filter' do
+        it 'return horror genre filter' do
+          allow(netflix).to receive(:filter).and_return([movie])
+          netflix.show(genre: 'Horror')
+          expect(netflix).to have_received(:filter).with({:genre=>"Horror"})
+        end
 
-        expect(netflix.show(genre: 'Horror')).to eq "Now showing: The thing #{current_time} - #{movie_end_time}"
-        expect(netflix.wallet).to eq 3.5
+        it 'check show film' do
+          allow(netflix).to receive(:filter).and_return([movie])
+          expect{netflix.show(genre: 'Horror')}.to output("Now showing: The thing 13:00 - 14:40\n").to_stdout
+          #expect(netflix.wallet).to eq 3.5
+        end
+
+        it 'expect to withdraw payment for movie' do
+          allow(netflix).to receive(:movies).and_return([movie])
+          expect {netflix.show()} .to change(netflix, :wallet).from(5).to(3.5)
+        end
       end
 
       it 'fails when movie with filter not found' do
-        netflix.stub(:filter) { [] }
+        allow(netflix).to receive(:filter).and_return([])
         expect{netflix.show(genre: 'Comedy')}.to raise_error(BaseTheater::MovieNotFound)
       end
     end
