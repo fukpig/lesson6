@@ -34,11 +34,9 @@ class Theater < BaseTheater
   end
 
   def show(time = Time.now.hour)
-    if time.class != Integer
-      time = get_hour(time)
-    end
+    hour = time.is_a?(Integer) ? time : guess_hour(time)
 
-    time_period = get_time_period(time)
+    time_period = get_time_period(hour)
     raise InvalidTimePeriod if time_period.nil?
     movie = find_movie_by_time(time_period)
     raise MovieNotFound.new(time: time) if movie.nil?
@@ -47,10 +45,9 @@ class Theater < BaseTheater
 
   private
 
-  def get_hour(time)
-    values = time.split(':')
-    raise InvalidTime if values.first.nil?
-    values.first.to_i
+  def guess_hour(time)
+    m = time.match(/^([01]?\d):([0-5]\d)$/) or fail "Wrong time format"
+    m[1].to_i
   end
 
   def get_time_period(hours)
